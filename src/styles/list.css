@@ -1,0 +1,27 @@
+/* Стили для списка объявлений */
+.list-container {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+   gap: 1rem;
+   padding: 1rem;
+}
+
+.list-item-card {
+   background-color: white;
+   border-radius: 8px;
+   padding: 1rem;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.list-item-card h3 {
+   font-size: 1.2rem;
+   color: #333;
+}
+
+.list-item-card p {
+   color: #555;
+}
+
+.list-item-card button {
+   margin-top: 1rem;
+}
