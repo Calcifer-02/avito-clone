@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // Импортируем cors
 
 const ItemTypes = {
    REAL_ESTATE: "Недвижимость",
@@ -9,6 +10,7 @@ const ItemTypes = {
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors()); // Включаем CORS для всех маршрутов
 
 // In-memory хранилище для объявлений
 let items = [];

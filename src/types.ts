@@ -1,13 +1,13 @@
-interface Ad {
+export default interface Ad {
    id: number;
-   title: string;
+   name: string; // Изменено с title на name
    description: string;
+   type: string; // Изменено с category на type
    location: string;
-   category: string;
+   price?: number;
    propertyType?: string;
    area?: number;
    rooms?: number;
-   price?: number;
    brand?: string;
    model?: string;
    year?: number;
@@ -17,5 +17,3 @@ interface Ad {
    cost?: number;
    schedule?: string;
 }
-
-export default Ad;

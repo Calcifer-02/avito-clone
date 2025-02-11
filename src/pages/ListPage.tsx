@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, List, Card, Input, Select, InputNumber } from "antd";
 import { useNavigate } from "react-router-dom";
 import Ad from "../types";
+import axios from "axios"; // Импортируем axios
 
 const ListPage: React.FC = () => {
    const navigate = useNavigate();
@@ -26,64 +27,81 @@ const ListPage: React.FC = () => {
    });
 
    useEffect(() => {
-      const storedAds = JSON.parse(localStorage.getItem("ads") || "[]");
-      setAds(storedAds);
+      const fetchAds = async () => {
+         try {
+            const response = await axios.get("http://localhost:3000/items"); // Загружаем данные с сервера
+            setAds(response.data);
+         } catch (error) {
+            console.error("Ошибка при загрузке объявлений:", error);
+         }
+      };
+      fetchAds();
    }, []);
 
-   const handleDelete = (id: number) => {
-      const updatedAds = ads.filter((ad) => ad.id !== id);
-      setAds(updatedAds);
-      localStorage.setItem("ads", JSON.stringify(updatedAds));
+   const handleDelete = async (id: number) => {
+      try {
+         await axios.delete(`http://localhost:3000/items/${id}`); // Удаляем объявление на сервере
+         setAds((prevAds) => prevAds.filter((ad) => ad.id !== id)); // Обновляем состояние
+      } catch (error) {
+         console.error("Ошибка при удалении объявления:", error);
+      }
    };
 
    // Фильтрация объявлений по названию, категории и дополнительным фильтрам
    const filteredAds = ads.filter(
       (ad) =>
-         (ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ad.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ad.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            String(ad.price)
+         (ad.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
+            ad.description
+               ?.toLowerCase()
+               ?.includes(searchQuery.toLowerCase()) ||
+            ad.type?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
+            String(ad.price ?? "")
                .toLowerCase()
                .includes(searchQuery.toLowerCase()) ||
-            String(ad.area).toLowerCase().includes(searchQuery.toLowerCase()) ||
-            String(ad.rooms)
+            String(ad.area ?? "")
                .toLowerCase()
                .includes(searchQuery.toLowerCase()) ||
-            String(ad.year).toLowerCase().includes(searchQuery.toLowerCase()) ||
-            String(ad.mileage)
+            String(ad.rooms ?? "")
                .toLowerCase()
                .includes(searchQuery.toLowerCase()) ||
-            String(ad.experience)
+            String(ad.year ?? "")
                .toLowerCase()
                .includes(searchQuery.toLowerCase()) ||
-            String(ad.cost)
+            String(ad.mileage ?? "")
+               .toLowerCase()
+               .includes(searchQuery.toLowerCase()) ||
+            String(ad.experience ?? "")
+               .toLowerCase()
+               .includes(searchQuery.toLowerCase()) ||
+            String(ad.cost ?? "")
                .toLowerCase()
                .includes(searchQuery.toLowerCase())) &&
-         (!selectedCategory || ad.category === selectedCategory) &&
+         (!selectedCategory || ad.type === selectedCategory) &&
          (filters.propertyType === "" ||
             ad.propertyType?.toLowerCase() ===
                filters.propertyType.toLowerCase()) &&
          (filters.areaMin === null ||
-            (ad.area && ad.area >= filters.areaMin)) &&
+            (ad.area !== undefined && ad.area >= filters.areaMin)) &&
          (filters.roomsMin === null ||
-            (ad.rooms && ad.rooms >= filters.roomsMin)) &&
+            (ad.rooms !== undefined && ad.rooms >= filters.roomsMin)) &&
          (filters.priceMin === null ||
-            (ad.price && ad.price >= filters.priceMin)) &&
+            (ad.price !== undefined && ad.price >= filters.priceMin)) &&
          (filters.brand === "" ||
             ad.brand?.toLowerCase() === filters.brand.toLowerCase()) &&
          (filters.model === "" ||
             ad.model?.toLowerCase() === filters.model.toLowerCase()) &&
          (filters.yearMin === null ||
-            (ad.year && ad.year >= filters.yearMin)) &&
+            (ad.year !== undefined && ad.year >= filters.yearMin)) &&
          (filters.mileageMax === null ||
-            (ad.mileage && ad.mileage <= filters.mileageMax)) &&
+            (ad.mileage !== undefined && ad.mileage <= filters.mileageMax)) &&
          (filters.serviceType === "" ||
             ad.serviceType?.toLowerCase() ===
                filters.serviceType.toLowerCase()) &&
          (filters.experienceMin === null ||
-            (ad.experience && ad.experience >= filters.experienceMin)) &&
+            (ad.experience !== undefined &&
+               ad.experience >= filters.experienceMin)) &&
          (filters.costMin === null ||
-            (ad.cost && ad.cost >= filters.costMin)) &&
+            (ad.cost !== undefined && ad.cost >= filters.costMin)) &&
          (filters.schedule === "" ||
             ad.schedule?.toLowerCase() === filters.schedule.toLowerCase())
    );
@@ -276,7 +294,7 @@ const ListPage: React.FC = () => {
             renderItem={(ad) => (
                <List.Item>
                   <Card
-                     title={ad.title}
+                     title={ad.name}
                      actions={[
                         <Button
                            key="open"
@@ -294,7 +312,7 @@ const ListPage: React.FC = () => {
                      ]}
                   >
                      <p>Описание: {ad.description}</p>
-                     <p>Категория: {ad.category}</p>
+                     <p>Категория: {ad.type}</p>
                      <p>Локация: {ad.location}</p>
                      {ad.price !== undefined && <p>Цена: {ad.price} руб.</p>}
                      {ad.propertyType && (

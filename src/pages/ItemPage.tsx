@@ -2,54 +2,62 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import Ad from "../types";
+import axios from "axios"; // Импортируем axios
 const { Option } = Select;
 
 const ItemPage = () => {
    const { id } = useParams<{ id: string }>();
    const navigate = useNavigate();
-
-   const [ads, setAds] = useState<Ad[]>(() =>
-      JSON.parse(localStorage.getItem("ads") || "[]")
-   );
+   const [ad, setAd] = useState<Ad | null>(null);
    const [isEditing, setIsEditing] = useState(false);
-
-   // Используем message.useMessage()
    const [messageApi, contextHolder] = message.useMessage();
 
    useEffect(() => {
-      localStorage.setItem("ads", JSON.stringify(ads));
-   }, [ads]);
+      const fetchAd = async () => {
+         try {
+            const response = await axios.get(
+               `http://localhost:3000/items/${id}`
+            );
+            setAd(response.data);
+         } catch (error) {
+            console.error("Ошибка при загрузке объявления:", error);
+         }
+      };
+      fetchAd();
+   }, [id]);
 
-   const ad = ads.find((ad) => ad.id === Number(id));
+   const handleSubmit = async (values: Partial<Ad>) => {
+      try {
+         const response = await axios.put(
+            `http://localhost:3000/items/${id}`,
+            values
+         );
+         setAd(response.data);
+         messageApi.success("Изменения успешно сохранены!");
+         setIsEditing(false);
+      } catch (error) {
+         console.error("Ошибка при обновлении объявления:", error);
+         messageApi.error("Не удалось сохранить изменения");
+      }
+   };
+
+   const handleDelete = async () => {
+      try {
+         await axios.delete(`http://localhost:3000/items/${id}`);
+         messageApi.success("Объявление успешно удалено!");
+         navigate("/list");
+      } catch (error) {
+         console.error("Ошибка при удалении объявления:", error);
+         messageApi.error("Не удалось удалить объявление");
+      }
+   };
 
    if (!ad) {
       return <p>Объявление не найдено</p>;
    }
 
-   const handleSubmit = (values: Partial<Ad>) => {
-      const updatedAds = ads.map((item) =>
-         item.id === ad.id ? { ...item, ...values } : item
-      );
-      setAds(updatedAds);
-
-      // Показать уведомление об успешном сохранении
-      messageApi.success("Изменения успешно сохранены!");
-      setIsEditing(false);
-   };
-
-   const handleDelete = () => {
-      const updatedAds = ads.filter((item) => item.id !== ad.id);
-      setAds(updatedAds);
-
-      // Показать уведомление об успешном удалении
-      messageApi.success("Объявление успешно удалено!");
-      navigate("/list");
-   };
-
    const toggleEdit = () => {
       setIsEditing(!isEditing);
-
-      // Показать уведомление о режиме редактирования
       if (!isEditing) {
          messageApi.info("Режим редактирования активен");
       } else {
@@ -61,12 +69,12 @@ const ItemPage = () => {
       <div>
          {contextHolder} {/* Добавляем сюда для работы уведомлений */}
          <h1>Просмотр объявления</h1>
-         <h2>{ad.title}</h2>
+         <h2>{ad.name}</h2>
          <p>{ad.description}</p>
          <p>Локация: {ad.location}</p>
-         <h3>Категория: {ad.category}</h3>
+         <h3>Категория: {ad.type}</h3>
          {/* Отображаем дополнительные параметры в зависимости от категории */}
-         {ad.category === "Недвижимость" && (
+         {ad.type === "Недвижимость" && (
             <>
                <p>Тип недвижимости: {ad.propertyType}</p>
                <p>Площадь: {ad.area} кв.м</p>
@@ -74,7 +82,7 @@ const ItemPage = () => {
                <p>Цена: {ad.price} руб.</p>
             </>
          )}
-         {ad.category === "Авто" && (
+         {ad.type === "Авто" && (
             <>
                <p>Марка: {ad.brand}</p>
                <p>Модель: {ad.model}</p>
@@ -82,7 +90,7 @@ const ItemPage = () => {
                <p>Пробег: {ad.mileage} км</p>
             </>
          )}
-         {ad.category === "Услуги" && (
+         {ad.type === "Услуги" && (
             <>
                <p>Тип услуги: {ad.serviceType}</p>
                <p>Опыт работы: {ad.experience} лет</p>
@@ -92,7 +100,7 @@ const ItemPage = () => {
          )}
          <Form onFinish={handleSubmit} initialValues={ad}>
             <Form.Item
-               name="title"
+               name="name"
                label="Заголовок"
                rules={[{ required: true }]}
             >
@@ -112,16 +120,15 @@ const ItemPage = () => {
             >
                <Input disabled={!isEditing} />
             </Form.Item>
-
             <Form.Item
-               name="category"
+               name="type" // Изменено с category на type
                label="Категория"
                style={{ display: "none" }}
             >
                <Input disabled={true} />
             </Form.Item>
 
-            {ad.category === "Недвижимость" && (
+            {ad.type === "Недвижимость" && (
                <>
                   <Form.Item name="propertyType" label="Тип недвижимости">
                      <Select disabled={!isEditing}>
@@ -142,7 +149,7 @@ const ItemPage = () => {
                </>
             )}
 
-            {ad.category === "Авто" && (
+            {ad.type === "Авто" && (
                <>
                   <Form.Item name="brand" label="Марка">
                      <Input disabled={!isEditing} />
@@ -163,7 +170,7 @@ const ItemPage = () => {
                </>
             )}
 
-            {ad.category === "Услуги" && (
+            {ad.type === "Услуги" && (
                <>
                   <Form.Item name="serviceType" label="Тип услуги">
                      <Select disabled={!isEditing}>
@@ -199,9 +206,9 @@ const ItemPage = () => {
                marginTop: "20px",
                marginRight: "10px",
                borderRadius: "4px",
-               backgroundColor: isEditing ? "#d9d9d9" : "#1677ff", // Серый цвет, если кнопка заблокирована
-               color: isEditing ? "#a0a0a0" : "white", // Блеклый текст, если кнопка заблокирована
-               cursor: isEditing ? "not-allowed" : "pointer", // Делаем курсор "запрещено", если заблокировано
+               backgroundColor: isEditing ? "#d9d9d9" : "#1677ff",
+               color: isEditing ? "#a0a0a0" : "white",
+               cursor: isEditing ? "not-allowed" : "pointer",
             }}
             type="default"
             block

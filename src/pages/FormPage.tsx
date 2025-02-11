@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Form, Input, Select, Button, InputNumber, message } from "antd";
 import Ad from "../types";
+import axios from "axios";
+
 const { Option } = Select;
 
 type Category = "Недвижимость" | "Авто" | "Услуги";
@@ -10,24 +12,66 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
 }) => {
    const [category, setCategory] = useState<Category | null>(null);
    const [form] = Form.useForm(); // Создаем объект формы
+   const [messageApi, contextHolder] = message.useMessage();
 
    const handleCategoryChange = (value: Category) => {
       setCategory(value);
    };
 
-   const [messageApi, contextHolder] = message.useMessage();
+   const handleSubmit = async (values: Omit<Ad, "id">) => {
+      try {
+         // Убедитесь, что все обязательные поля присутствуют
+         if (
+            !values.name ||
+            !values.description ||
+            !values.location ||
+            !values.type
+         ) {
+            throw new Error("Отсутствуют обязательные поля");
+         }
 
-   const handleSubmit = (values: Omit<Ad, "id">) => {
-      messageApi.success("Объявление успешно добавлено!");
+         // Добавляем дополнительные проверки для категорий
+         if (values.type === "Недвижимость") {
+            if (
+               !values.propertyType ||
+               !values.area ||
+               !values.rooms ||
+               !values.price
+            ) {
+               throw new Error(
+                  "Недостаточно данных для категории 'Недвижимость'"
+               );
+            }
+         } else if (values.type === "Авто") {
+            if (
+               !values.brand ||
+               !values.model ||
+               !values.year ||
+               !values.mileage
+            ) {
+               throw new Error("Недостаточно данных для категории 'Авто'");
+            }
+         } else if (values.type === "Услуги") {
+            if (!values.serviceType || !values.experience || !values.cost) {
+               throw new Error("Недостаточно данных для категории 'Услуги'");
+            }
+         }
 
-      const ads = JSON.parse(localStorage.getItem("ads") || "[]");
-      const newAd = { id: Date.now(), ...values };
-      const updatedAds = [...ads, newAd];
-      localStorage.setItem("ads", JSON.stringify(updatedAds));
-      onSubmit(newAd);
+         // Отправляем данные на сервер
+         const response = await axios.post(
+            "http://localhost:3000/items",
+            values
+         );
+         const newAd = response.data; // Получаем созданный объект с id
 
-      form.resetFields(); // Очищаем форму после успешного добавления
-      setCategory(null); // Сбрасываем выбранную категорию
+         messageApi.success("Объявление успешно добавлено!");
+         onSubmit(newAd); // Передаем данные родительскому компоненту
+         form.resetFields(); // Очищаем форму
+         setCategory(null); // Сбрасываем выбранную категорию
+      } catch (error) {
+         console.error("Ошибка при добавлении объявления:", error);
+         messageApi.error("Не удалось добавить объявление");
+      }
    };
 
    return (
@@ -41,47 +85,52 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
          >
             <h1>Форма добавления объявления</h1>
             <Form.Item
-               name="title"
+               name="name"
                label="Название"
-               rules={[{ required: true }]}
+               rules={[{ required: true, message: "Введите название" }]}
             >
                <Input />
             </Form.Item>
-
             <Form.Item
                name="description"
                label="Описание"
-               rules={[{ required: true }]}
+               rules={[{ required: true, message: "Введите описание" }]}
             >
                <Input.TextArea />
             </Form.Item>
-
             <Form.Item
                name="location"
                label="Локация"
-               rules={[{ required: true }]}
+               rules={[{ required: true, message: "Введите локацию" }]}
             >
                <Input />
             </Form.Item>
-
             <Form.Item
-               name="category"
+               name="type"
                label="Категория"
-               rules={[{ required: true }]}
+               rules={[{ required: true, message: "Выберите категорию" }]}
             >
-               <Select onChange={handleCategoryChange}>
+               <Select
+                  onChange={(value) => handleCategoryChange(value as Category)}
+               >
                   <Option value="Недвижимость">Недвижимость</Option>
                   <Option value="Авто">Авто</Option>
                   <Option value="Услуги">Услуги</Option>
                </Select>
             </Form.Item>
 
+            {/* Поля для недвижимости */}
             {category === "Недвижимость" && (
                <>
                   <Form.Item
                      name="propertyType"
                      label="Тип недвижимости"
-                     rules={[{ required: true }]}
+                     rules={[
+                        {
+                           required: true,
+                           message: "Выберите тип недвижимости",
+                        },
+                     ]}
                   >
                      <Select>
                         <Option value="Квартира">Квартира</Option>
@@ -92,62 +141,105 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
                   <Form.Item
                      name="area"
                      label="Площадь (кв.м)"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите площадь",
+                        },
+                     ]}
                   >
                      <InputNumber min={1} />
                   </Form.Item>
                   <Form.Item
                      name="rooms"
                      label="Количество комнат"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите количество комнат",
+                        },
+                     ]}
                   >
                      <InputNumber min={1} />
                   </Form.Item>
                   <Form.Item
                      name="price"
                      label="Цена"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите цену",
+                        },
+                     ]}
                   >
                      <InputNumber min={0} />
                   </Form.Item>
                </>
             )}
 
+            {/* Поля для авто */}
             {category === "Авто" && (
                <>
                   <Form.Item
                      name="brand"
                      label="Марка"
-                     rules={[{ required: true }]}
+                     rules={[{ required: true, message: "Введите марку" }]}
                   >
                      <Input />
                   </Form.Item>
                   <Form.Item
                      name="model"
                      label="Модель"
-                     rules={[{ required: true }]}
+                     rules={[{ required: true, message: "Введите модель" }]}
                   >
                      <Input />
                   </Form.Item>
                   <Form.Item
                      name="year"
                      label="Год выпуска"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите год выпуска",
+                        },
+                        {
+                           type: "number",
+                           max: new Date().getFullYear(),
+                           message: "Год не может быть больше текущего",
+                        },
+                     ]}
                   >
                      <InputNumber min={1900} max={new Date().getFullYear()} />
                   </Form.Item>
-                  <Form.Item name="mileage" label="Пробег (км)">
+                  <Form.Item
+                     name="mileage"
+                     label="Пробег (км)"
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите пробег",
+                        },
+                     ]}
+                  >
                      <InputNumber min={0} />
                   </Form.Item>
                </>
             )}
 
+            {/* Поля для услуг */}
             {category === "Услуги" && (
                <>
                   <Form.Item
                      name="serviceType"
                      label="Тип услуги"
-                     rules={[{ required: true }]}
+                     rules={[
+                        { required: true, message: "Выберите тип услуги" },
+                     ]}
                   >
                      <Select>
                         <Option value="Ремонт">Ремонт</Option>
@@ -158,18 +250,36 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
                   <Form.Item
                      name="experience"
                      label="Опыт работы (лет)"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите опыт работы",
+                        },
+                     ]}
                   >
                      <InputNumber min={0} />
                   </Form.Item>
                   <Form.Item
                      name="cost"
                      label="Стоимость"
-                     rules={[{ required: true, type: "number" }]}
+                     rules={[
+                        {
+                           required: true,
+                           type: "number",
+                           message: "Введите стоимость",
+                        },
+                     ]}
                   >
                      <InputNumber min={0} />
                   </Form.Item>
-                  <Form.Item name="schedule" label="График работы">
+                  <Form.Item
+                     name="schedule"
+                     label="График работы"
+                     rules={[
+                        { required: true, message: "Введите график работы" },
+                     ]}
+                  >
                      <Input />
                   </Form.Item>
                </>
