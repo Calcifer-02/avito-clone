@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, InputNumber, Select, message } from "antd";
+import { Button, Form, message } from "antd";
+import axios from "axios";
 import Ad from "../types";
-import axios from "axios"; // Импортируем axios
-const { Option } = Select;
+import CommonItemFields from "../components/ItemFields/CommonItemFields";
+import RealEstateItemFields from "../components/ItemFields/RealEstateItemFields";
+import AutoItemFields from "../components/ItemFields/AutoItemFields";
+import ServicesItemFields from "../components/ItemFields/ServicesItemFields";
 
-const ItemPage = () => {
+const ItemPage: React.FC = () => {
    const { id } = useParams<{ id: string }>();
    const navigate = useNavigate();
    const [ad, setAd] = useState<Ad | null>(null);
@@ -52,10 +55,6 @@ const ItemPage = () => {
       }
    };
 
-   if (!ad) {
-      return <p>Объявление не найдено</p>;
-   }
-
    const toggleEdit = () => {
       setIsEditing(!isEditing);
       if (!isEditing) {
@@ -65,14 +64,19 @@ const ItemPage = () => {
       }
    };
 
+   if (!ad) {
+      return <p>Объявление не найдено</p>;
+   }
+
    return (
       <div>
-         {contextHolder} {/* Добавляем сюда для работы уведомлений */}
+         {contextHolder}
          <h1>Просмотр объявления</h1>
          <h2>{ad.name}</h2>
          <p>{ad.description}</p>
          <p>Локация: {ad.location}</p>
          <h3>Категория: {ad.type}</h3>
+
          {/* Отображаем дополнительные параметры в зависимости от категории */}
          {ad.type === "Недвижимость" && (
             <>
@@ -98,99 +102,16 @@ const ItemPage = () => {
                <p>График работы: {ad.schedule}</p>
             </>
          )}
+
          <Form onFinish={handleSubmit} initialValues={ad}>
-            <Form.Item
-               name="name"
-               label="Заголовок"
-               rules={[{ required: true }]}
-            >
-               <Input disabled={!isEditing} />
-            </Form.Item>
-            <Form.Item
-               name="description"
-               label="Описание"
-               rules={[{ required: true }]}
-            >
-               <Input.TextArea disabled={!isEditing} />
-            </Form.Item>
-            <Form.Item
-               name="location"
-               label="Локация"
-               rules={[{ required: true }]}
-            >
-               <Input disabled={!isEditing} />
-            </Form.Item>
-            <Form.Item
-               name="type" // Изменено с category на type
-               label="Категория"
-               style={{ display: "none" }}
-            >
-               <Input disabled={true} />
-            </Form.Item>
-
+            <CommonItemFields isEditing={isEditing} />
             {ad.type === "Недвижимость" && (
-               <>
-                  <Form.Item name="propertyType" label="Тип недвижимости">
-                     <Select disabled={!isEditing}>
-                        <Option value="Квартира">Квартира</Option>
-                        <Option value="Дом">Дом</Option>
-                        <Option value="Коттедж">Коттедж</Option>
-                     </Select>
-                  </Form.Item>
-                  <Form.Item name="area" label="Площадь (кв.м)">
-                     <InputNumber min={1} disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="rooms" label="Количество комнат">
-                     <InputNumber min={1} disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="price" label="Цена">
-                     <InputNumber min={0} disabled={!isEditing} />
-                  </Form.Item>
-               </>
+               <RealEstateItemFields isEditing={isEditing} />
             )}
-
-            {ad.type === "Авто" && (
-               <>
-                  <Form.Item name="brand" label="Марка">
-                     <Input disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="model" label="Модель">
-                     <Input disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="year" label="Год выпуска">
-                     <InputNumber
-                        min={1900}
-                        max={new Date().getFullYear()}
-                        disabled={!isEditing}
-                     />
-                  </Form.Item>
-                  <Form.Item name="mileage" label="Пробег (км)">
-                     <InputNumber min={0} disabled={!isEditing} />
-                  </Form.Item>
-               </>
-            )}
-
+            {ad.type === "Авто" && <AutoItemFields isEditing={isEditing} />}
             {ad.type === "Услуги" && (
-               <>
-                  <Form.Item name="serviceType" label="Тип услуги">
-                     <Select disabled={!isEditing}>
-                        <Option value="Ремонт">Ремонт</Option>
-                        <Option value="Уборка">Уборка</Option>
-                        <Option value="Доставка">Доставка</Option>
-                     </Select>
-                  </Form.Item>
-                  <Form.Item name="experience" label="Опыт работы (лет)">
-                     <InputNumber min={0} disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="cost" label="Стоимость">
-                     <InputNumber min={0} disabled={!isEditing} />
-                  </Form.Item>
-                  <Form.Item name="schedule" label="График работы">
-                     <Input disabled={!isEditing} />
-                  </Form.Item>
-               </>
+               <ServicesItemFields isEditing={isEditing} />
             )}
-
             <Button
                type="primary"
                htmlType="submit"
@@ -200,6 +121,7 @@ const ItemPage = () => {
                Сохранить
             </Button>
          </Form>
+
          <Button
             onClick={toggleEdit}
             style={{
@@ -216,6 +138,7 @@ const ItemPage = () => {
          >
             Редактировать
          </Button>
+
          <div style={{ marginTop: "20px", marginBottom: "20px" }}>
             <Button
                onClick={() => navigate("/list")}

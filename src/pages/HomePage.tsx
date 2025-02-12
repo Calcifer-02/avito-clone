@@ -2,13 +2,16 @@ import React from "react";
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
+// HomePage — компонент для отображения главной страницы
 const HomePage: React.FC = () => {
    const navigate = useNavigate();
 
+   // Обработчик перехода к форме создания объявления
    const handleCreateAd = () => {
       navigate("/form");
    };
 
+   // Обработчик перехода к списку объявлений
    const handleViewAds = () => {
       navigate("/list");
    };

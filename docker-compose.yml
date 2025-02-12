@@ -1,0 +1,27 @@
+services:
+   client:
+      build:
+         context: .
+         dockerfile: Dockerfile
+      ports:
+         - "5173:5173/"
+      volumes:
+         - .:/app
+      depends_on:
+         - server
+      environment:
+         - NODE_ENV=development
+
+   server:
+      build:
+         context: .
+         dockerfile: server/Dockerfile
+      ports:
+         - "3000:3000"
+      volumes:
+         - ./server:/server
+      environment:
+         - NODE_ENV=development
+networks:
+   avito-network:
+      driver: bridge
