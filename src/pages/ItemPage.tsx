@@ -9,63 +9,66 @@ import AutoItemFields from "../components/ItemFields/AutoItemFields";
 import ServicesItemFields from "../components/ItemFields/ServicesItemFields";
 
 const ItemPage: React.FC = () => {
-   const { id } = useParams<{ id: string }>();
-   const navigate = useNavigate();
-   const [ad, setAd] = useState<Ad | null>(null);
-   const [isEditing, setIsEditing] = useState(false);
-   const [messageApi, contextHolder] = message.useMessage();
+   const { id } = useParams<{ id: string }>(); // Извлекаем ID из параметров URL
+   const navigate = useNavigate(); // Для навигации по страницам
+   const [ad, setAd] = useState<Ad | null>(null); // Состояние для объявления
+   const [isEditing, setIsEditing] = useState(false); // Состояние для режима редактирования
+   const [messageApi, contextHolder] = message.useMessage(); // Для отображения сообщений
 
    useEffect(() => {
+      // Получаем объявление с сервера по ID
       const fetchAd = async () => {
          try {
             const response = await axios.get(
                `http://localhost:3000/items/${id}`
             );
-            setAd(response.data);
+            setAd(response.data); // Устанавливаем полученное объявление в состояние
          } catch (error) {
             console.error("Ошибка при загрузке объявления:", error);
          }
       };
       fetchAd();
-   }, [id]);
+   }, [id]); // Загружаем данные при изменении ID в URL
 
    const handleSubmit = async (values: Partial<Ad>) => {
+      // Отправка обновленных данных на сервер
       try {
          const response = await axios.put(
             `http://localhost:3000/items/${id}`,
             values
          );
-         setAd(response.data);
-         messageApi.success("Изменения успешно сохранены!");
-         setIsEditing(false);
+         setAd(response.data); // Обновляем состояние с новым значением объявления
+         messageApi.success("Изменения успешно сохранены!"); // Показываем успех
+         setIsEditing(false); // Выключаем режим редактирования
       } catch (error) {
          console.error("Ошибка при обновлении объявления:", error);
-         messageApi.error("Не удалось сохранить изменения");
+         messageApi.error("Не удалось сохранить изменения"); // Ошибка
       }
    };
 
    const handleDelete = async () => {
+      // Удаление объявления
       try {
          await axios.delete(`http://localhost:3000/items/${id}`);
-         messageApi.success("Объявление успешно удалено!");
-         navigate("/list");
+         messageApi.success("Объявление успешно удалено!"); // Показываем успех
+         navigate("/list"); // Переход на страницу списка
       } catch (error) {
          console.error("Ошибка при удалении объявления:", error);
-         messageApi.error("Не удалось удалить объявление");
+         messageApi.error("Не удалось удалить объявление"); // Ошибка
       }
    };
 
    const toggleEdit = () => {
-      setIsEditing(!isEditing);
-      if (!isEditing) {
-         messageApi.info("Режим редактирования активен");
-      } else {
-         messageApi.info("Режим редактирования отключен");
-      }
+      setIsEditing(!isEditing); // Переключение режима редактирования
+      messageApi.info(
+         isEditing
+            ? "Режим редактирования отключен"
+            : "Режим редактирования активен"
+      ); // Информация о режиме
    };
 
    if (!ad) {
-      return <p>Объявление не найдено</p>;
+      return <p>Объявление не найдено</p>; // Если объявление не найдено, показываем сообщение
    }
 
    return (
@@ -103,6 +106,7 @@ const ItemPage: React.FC = () => {
             </>
          )}
 
+         {/* Форма для редактирования объявления */}
          <Form onFinish={handleSubmit} initialValues={ad}>
             <CommonItemFields isEditing={isEditing} />
             {ad.type === "Недвижимость" && (
@@ -122,6 +126,7 @@ const ItemPage: React.FC = () => {
             </Button>
          </Form>
 
+         {/* Кнопка для переключения режима редактирования */}
          <Button
             onClick={toggleEdit}
             style={{
@@ -140,6 +145,7 @@ const ItemPage: React.FC = () => {
          </Button>
 
          <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+            {/* Кнопки для навигации и удаления */}
             <Button
                onClick={() => navigate("/list")}
                style={{

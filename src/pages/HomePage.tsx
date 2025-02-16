@@ -3,10 +3,11 @@ import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
 const HomePage: React.FC = () => {
-   const navigate = useNavigate();
-   const isAuthenticated = !!localStorage.getItem("token"); // Проверяем, есть ли токен
+   const navigate = useNavigate(); // Хук для перехода между страницами
+   const isAuthenticated = !!localStorage.getItem("token"); // Проверяем наличие токена в localStorage
 
    const handleProtectedNavigation = (path: string) => {
+      // Если токен есть, переходим по указанному пути, если нет — на страницу логина
       if (isAuthenticated) {
          navigate(path);
       } else {
@@ -26,7 +27,7 @@ const HomePage: React.FC = () => {
             <Button
                type="primary"
                size="large"
-               onClick={() => handleProtectedNavigation("/form")}
+               onClick={() => handleProtectedNavigation("/form")} // Переход к форме добавления объявления
                style={{ marginRight: "20px" }}
             >
                Создать новое объявление
@@ -34,7 +35,7 @@ const HomePage: React.FC = () => {
             <Button
                type="default"
                size="large"
-               onClick={() => handleProtectedNavigation("/list")}
+               onClick={() => handleProtectedNavigation("/list")} // Переход к списку объявлений
                style={{ marginRight: "20px" }}
             >
                Перейти к списку объявлений

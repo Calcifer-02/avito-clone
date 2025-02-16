@@ -1,50 +1,98 @@
-# React + TypeScript + Vite
+# Avito Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Описание
 
-Currently, two official plugins are available:
+Проект представляет собой клон платформы для размещения объявлений с функциональностью авторизации, фильтрации по различным критериям и отображением объявлений.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Технологии
 
-## Expanding the ESLint configuration
+-  React
+-  TypeScript
+-  Node.js
+-  Express
+-  Ant Design
+-  Vite
+-  Docker (для контейнеризации)
+-  Axios
+-  Jest
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Установка и запуск приложения
 
-- Configure the top-level `parserOptions` property like this:
+### 1. Локальный запуск
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1. Клонируйте репозиторий:
+   git clone https://github.com/Calcifer-02/avito-clone.git
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. Перейдите в директорию проекта:
+   cd avito-clone
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+3. Установите зависимости для клиента и серверов:
+   Для клиента в корне проекта:
+   npm install
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+Для сервера объявлений:
+cd server
+npm install
+
+Для сервера авторизации:
+cd ..
+cd json-server
+npm install
+
+4. Запустите сервер с объявлениями:
+   В папке `server` выполните команду:
+   node app.js
+   Это запустит сервер объявлений на `http://localhost:3000`.
+
+5. Запустите сервер с авторизацией:
+   В папке `auth` выполните команду:
+   node index.js
+   Это запустит сервер авторизации на `http://localhost:8000`.
+
+6. Запустите клиент:
+   В папке `src` выполните команду:
+   npm run dev
+   Это запустит клиент на `http://localhost:5173`.
+
+Теперь ваше приложение будет доступно локально!
+
+### 2. Запуск в Docker
+
+Для запуска приложения в Docker используйте Docker Compose для удобства работы с несколькими контейнерами.
+
+1. Перейдите в корневую директорию проекта (если вы еще не там):
+   cd avito-clone
+
+2. Соберите и запустите контейнеры с помощью Docker Compose:
+   docker-compose up --build
+
+3. После успешного запуска контейнеров ваше приложение будет доступно:
+
+-  Клиент: `http://localhost:5173`
+-  Сервер объявлений: `http://localhost:3000`
+-  Сервер авторизации: `http://localhost:8000`
+
+4. Чтобы остановить контейнеры, выполните:
+   docker-compose down
+
+## Примечания
+
+-  Убедитесь, что у вас установлен [Docker](https://www.docker.com/get-started) и [Docker Compose](https://docs.docker.com/compose/install/) для работы с контейнерами.
+-  Для локальной разработки используйте команды из раздела **Локальный запуск**.
+
+## Примечания и сложности
+
+-  Тесты: Я попытался настроить тесты для компонентов и серверов, но так как я изучал тестирование на ходу, мне не удалось завершить их написание на 100%. Однако я смог настроить тесты для базовых компонентов и функционала, и они выполняются корректно. В будущем я планирую улучшить покрытие тестами, а также изучить более сложные сценарии тестирования.
+-  Валидация и обработка ошибок: Все формы в приложении содержат базовую валидацию (например, для полей ввода). Валидация на серверной стороне также настроена, однако нужно будет доработать более сложные сценарии для обработки ошибок и исключений.
+
+-  Структура проекта: Структура проекта организована с использованием контейнеров Docker для разделения логики серверов и клиента. Я использовал Docker Compose для упрощения запуска и управления контейнерами. В проекте применяется стандартная архитектура для React и Express.
+
+-  Деструктуризация файлов: Попытался сделать её в соответствии с best practice, но время было ограничено, поэтому я сконцентрировался на функциональности и адаптивности проекта, а не над организацией файлов.
+
+-  Функциональность: Реализована базовая функциональность для работы с объявлениями (создание, редактирование, удаление, фильтрация), а также система авторизации. Все сервисы работают как локально, так и в Docker-контейнерах.
+
+-  Планы на будущее: Мне предстоит улучшить тестовое покрытие, улучшить обработку ошибок и добавить более сложные сценарии валидации. Также в дальнейшем можно улучшить функциональность фильтрации и добавить дополнительные проверки при авторизации.
+
+---
+
+Я старался сделать проект максимально функциональным и структурированным, однако есть несколько областей, которые могут потребовать доработки и улучшений, и я буду рад получить обратную связь для дальнейшего улучшения.

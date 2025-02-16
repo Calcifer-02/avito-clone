@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors"); // Импортируем cors
+const cors = require("cors"); // Подключаем middleware для CORS
 
+// Константы для типов объявлений
 const ItemTypes = {
    REAL_ESTATE: "Недвижимость",
    AUTO: "Авто",
@@ -9,12 +10,13 @@ const ItemTypes = {
 };
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // Для парсинга JSON в теле запроса
 app.use(cors()); // Включаем CORS для всех маршрутов
 
-// In-memory хранилище для объявлений
+// Хранилище для объявлений (in-memory)
 let items = [];
 
+// Функция для генерации уникальных id для объявлений
 const makeCounter = () => {
    let count = 0;
    return () => count++;
@@ -22,15 +24,16 @@ const makeCounter = () => {
 
 const itemsIdCounter = makeCounter();
 
-// Создание нового объявления
+// Эндпоинт для создания нового объявления
 app.post("/items", (req, res) => {
    const { name, description, location, type, ...rest } = req.body;
 
-   // Validate common required fields
+   // Проверка обязательных полей для всех типов
    if (!name || !description || !location || !type) {
       return res.status(400).json({ error: "Missing required common fields" });
    }
 
+   // Проверка обязательных полей в зависимости от типа объявления
    switch (type) {
       case ItemTypes.REAL_ESTATE:
          if (!rest.propertyType || !rest.area || !rest.rooms || !rest.price) {
@@ -57,6 +60,7 @@ app.post("/items", (req, res) => {
          return res.status(400).json({ error: "Invalid type" });
    }
 
+   // Создание нового объявления
    const item = {
       id: itemsIdCounter(),
       name,
@@ -66,51 +70,51 @@ app.post("/items", (req, res) => {
       ...rest,
    };
 
-   items.push(item);
-   res.status(201).json(item);
+   items.push(item); // Добавляем объявление в хранилище
+   res.status(201).json(item); // Отправляем новое объявление в ответе
 });
 
-// Получение всех объявлений
+// Эндпоинт для получения всех объявлений
 app.get("/items", (req, res) => {
-   res.json(items);
+   res.json(items); // Отправляем все объявления
 });
 
-// Получение объявления по его id
+// Эндпоинт для получения объявления по id
 app.get("/items/:id", (req, res) => {
    const item = items.find((i) => i.id === parseInt(req.params.id, 10));
    if (item) {
-      res.json(item);
+      res.json(item); // Отправляем найденное объявление
    } else {
-      res.status(404).send("Item not found");
+      res.status(404).send("Item not found"); // Ошибка, если не найдено
    }
 });
 
-// Обновление объявления по его id
+// Эндпоинт для обновления объявления по id
 app.put("/items/:id", (req, res) => {
    const item = items.find((i) => i.id === parseInt(req.params.id, 10));
    if (item) {
-      Object.assign(item, req.body);
-      res.json(item);
+      Object.assign(item, req.body); // Обновляем поля объявления
+      res.json(item); // Отправляем обновленное объявление
    } else {
-      res.status(404).send("Item not found");
+      res.status(404).send("Item not found"); // Ошибка, если не найдено
    }
 });
 
-// Удаление объявления по его id
+// Эндпоинт для удаления объявления по id
 app.delete("/items/:id", (req, res) => {
    const itemIndex = items.findIndex(
       (i) => i.id === parseInt(req.params.id, 10)
    );
    if (itemIndex !== -1) {
-      items.splice(itemIndex, 1);
-      res.status(204).send();
+      items.splice(itemIndex, 1); // Удаляем объявление
+      res.status(204).send(); // Отправляем успешный ответ без контента
    } else {
-      res.status(404).send("Item not found");
+      res.status(404).send("Item not found"); // Ошибка, если не найдено
    }
 });
 
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
    console.log(`Server is running on port ${PORT}`);
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, List, Card, Select, Grid } from "antd"; // Импортируем Grid
+import { Button, List, Card, Select, Grid } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Ad from "../types";
@@ -10,15 +10,15 @@ import ServicesFilters from "../components/Filters/ServicesFilters";
 
 import "../styles/list.css";
 
-const { useBreakpoint } = Grid; // Используем хук useBreakpoint
+const { useBreakpoint } = Grid; // Хук для отслеживания размеров экрана
 
 const ListPage: React.FC = () => {
    const navigate = useNavigate();
-   const [ads, setAds] = useState<Ad[]>([]);
-   const [searchQuery, setSearchQuery] = useState("");
+   const [ads, setAds] = useState<Ad[]>([]); // Состояние для списка объявлений
+   const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
    const [selectedCategory, setSelectedCategory] = useState<string | null>(
       null
-   );
+   ); // Выбранная категория
    const [filters, setFilters] = useState({
       propertyType: "",
       areaMin: null as number | null,
@@ -32,70 +32,72 @@ const ListPage: React.FC = () => {
       experienceMin: null as number | null,
       costMin: null as number | null,
       schedule: "",
-   });
+   }); // Фильтры для отображения объявлений
 
-   // Используем хук useBreakpoint для отслеживания размера экрана
-   const screens = useBreakpoint();
+   const screens = useBreakpoint(); // Получаем информацию о размере экрана
 
-   // Функция для определения количества колонок в зависимости от размера экрана
+   // Функция для определения количества колонок на разных устройствах
    const getColumnCount = () => {
-      if (screens.xxl) return 5; // > 1600px
-      if (screens.xl) return 4; // > 1280px
-      if (screens.lg) return 3; // > 1024px
-      if (screens.md) return 2; // > 768px
-      return 1; // <= 768px
+      if (screens.xxl) return 5; // Для больших экранов
+      if (screens.xl) return 4; // Для экранов среднего размера
+      if (screens.lg) return 3; // Для экранов чуть меньшего размера
+      if (screens.md) return 2; // Для средних экранов
+      return 1; // Для мобильных устройств
    };
 
    useEffect(() => {
+      // Функция для загрузки объявлений
       const fetchAds = async () => {
          try {
             const response = await axios.get("http://localhost:3000/items");
-            setAds(response.data);
+            setAds(response.data); // Сохраняем полученные объявления в состоянии
          } catch (error) {
-            console.error("Ошибка при загрузке объявлений:", error);
+            console.error("Ошибка при загрузке объявлений:", error); // Логируем ошибку
          }
       };
       fetchAds();
    }, []);
 
    const handleDelete = async (id: number) => {
+      // Функция для удаления объявления
       try {
          await axios.delete(`http://localhost:3000/items/${id}`);
-         setAds((prevAds) => prevAds.filter((ad) => ad.id !== id));
+         setAds((prevAds) => prevAds.filter((ad) => ad.id !== id)); // Обновляем список объявлений
       } catch (error) {
-         console.error("Ошибка при удалении объявления:", error);
+         console.error("Ошибка при удалении объявления:", error); // Логируем ошибку
       }
    };
 
+   // Фильтруем объявления по введенному запросу и выбранным фильтрам
    const filteredAds = ads.filter(
       (ad) =>
-         (ad.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
+         (ad.name?.toLowerCase()?.includes(searchQuery.toLowerCase()) || // Поиск по имени
             ad.description
                ?.toLowerCase()
-               ?.includes(searchQuery.toLowerCase()) ||
-            ad.type?.toLowerCase()?.includes(searchQuery.toLowerCase()) ||
+               ?.includes(searchQuery.toLowerCase()) || // Поиск по описанию
+            ad.type?.toLowerCase()?.includes(searchQuery.toLowerCase()) || // Поиск по типу
             String(ad.price ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по цене
             String(ad.area ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по площади
             String(ad.rooms ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по количеству комнат
             String(ad.year ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по году
             String(ad.mileage ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по пробегу
             String(ad.experience ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase()) ||
+               .includes(searchQuery.toLowerCase()) || // Поиск по опыту
             String(ad.cost ?? "")
                .toLowerCase()
-               .includes(searchQuery.toLowerCase())) &&
-         (!selectedCategory || ad.type === selectedCategory) &&
+               .includes(searchQuery.toLowerCase())) && // Поиск по стоимости
+         (!selectedCategory || ad.type === selectedCategory) && // Фильтрация по категории
          (filters.propertyType === "" ||
             ad.propertyType?.toLowerCase() ===
                filters.propertyType.toLowerCase()) &&
@@ -143,6 +145,7 @@ const ListPage: React.FC = () => {
             onChange={(value) => {
                setSelectedCategory(value);
                setFilters({
+                  // Сброс фильтров при смене категории
                   propertyType: "",
                   areaMin: null,
                   roomsMin: null,
@@ -170,7 +173,7 @@ const ListPage: React.FC = () => {
          </Select>
          <br></br>
 
-         {/* Дополнительные фильтры */}
+         {/* Дополнительные фильтры в зависимости от категории */}
          {selectedCategory === "Недвижимость" && (
             <RealEstateFilters filters={filters} setFilters={setFilters} />
          )}
@@ -183,7 +186,7 @@ const ListPage: React.FC = () => {
 
          {/* Список объявлений */}
          {filteredAds.length === 0 ? (
-            <p>Ничего не найдено.</p>
+            <p>Ничего не найдено.</p> // Сообщение, если нет подходящих объявлений
          ) : (
             <List
                style={{ marginBottom: "20px" }}
@@ -201,14 +204,14 @@ const ListPage: React.FC = () => {
                         actions={[
                            <Button
                               key="open"
-                              onClick={() => navigate(`/item/${ad.id}`)}
+                              onClick={() => navigate(`/item/${ad.id}`)} // Открытие объявления
                            >
                               Открыть
                            </Button>,
                            <Button
                               key="delete"
                               danger
-                              onClick={() => handleDelete(ad.id)}
+                              onClick={() => handleDelete(ad.id)} // Удаление объявления
                            >
                               Удалить
                            </Button>,
