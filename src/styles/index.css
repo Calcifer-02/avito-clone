@@ -49,7 +49,6 @@ body {
    max-width: 200px;
    width: 100%;
    border-radius: 5px;
-   padding: 10px; /* Отступы внутри кнопки */
    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Легкая тень для объема */
    transition: all 0.3s ease; /* Плавный переход */
    text-align: center; /* Выравнивание текста по центру */
@@ -92,4 +91,74 @@ body {
 
 .layout .ant-layout-footer {
    margin-top: auto;
+}
+
+/* Для маленьких экранов (<=500px) */
+@media (max-width: 500px) {
+   .menu-button {
+      font-size: 12px; /* уменьшение размера шрифта */
+      padding: 6px 12px; /* уменьшение отступов для кнопок */
+   }
+
+   .logo svg {
+      width: 20px; /* уменьшение размера логотипа */
+      height: 20px;
+   }
+
+   .menu {
+      display: flex;
+      flex-direction: column; /* столбик для маленьких экранов */
+      align-items: center;
+   }
+
+   .avatar {
+      width: 30px;
+      height: 30px; /* уменьшение размера аватара */
+   }
+}
+
+/* Для экранов от 501px до 768px */
+@media (max-width: 500px) {
+   .menu {
+      display: flex;
+      flex-direction: row; /* столбик для маленьких экранов */
+      align-items: center;
+   }
+   .menu-button {
+      margin-left: 10px;
+      max-width: 150px;
+      border-radius: 5px;
+      padding: 10px; /* Отступы внутри кнопки */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Легкая тень для объема */
+      transition: all 0.3s ease; /* Плавный переход */
+      text-align: center; /* Выравнивание текста по центру */
+      display: inline-block; /* Чтобы кнопки не растягивались */
+   }
+
+   .logo svg {
+      width: 25px;
+      height: 25px;
+   }
+}
+
+@media (max-width: 400px) {
+   .menu {
+      display: flex;
+      flex-direction: row; /* столбик для маленьких экранов */
+      align-items: center;
+   }
+   .menu-button {
+      max-width: 130px;
+      border-radius: 5px;
+      padding: 10px; /* Отступы внутри кнопки */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Легкая тень для объема */
+      transition: all 0.3s ease; /* Плавный переход */
+      text-align: center; /* Выравнивание текста по центру */
+      display: inline-block; /* Чтобы кнопки не растягивались */
+   }
+
+   .logo svg {
+      width: 25px;
+      height: 25px;
+   }
 }

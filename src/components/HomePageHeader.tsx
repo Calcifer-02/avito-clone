@@ -30,7 +30,7 @@ const AppHeader = () => {
       <AntHeader className="app-header" style={{ marginBottom: "100px" }}>
          <div className="logo">
             <Link to="/">
-               {windowWidth >= 610 && (
+               {windowWidth >= 649 && (
                   <>
                      <svg
                         width="30"
@@ -82,7 +82,7 @@ const AppHeader = () => {
                className="menu-button"
                type="primary"
                size="large"
-               style={{ color: "white" }}
+               style={{ color: "white", textAlign: "center" }}
                onClick={() => handleProtectedNavigation("/form")}
             >
                Создать объявление
@@ -92,7 +92,7 @@ const AppHeader = () => {
                className="menu-button"
                type="primary"
                size="large"
-               style={{ color: "white" }}
+               style={{ color: "white", textAlign: "center" }}
                onClick={() => handleProtectedNavigation("/list")}
             >
                Список объявлений

@@ -42,7 +42,7 @@ const AutoFilters: React.FC<{
             placeholder="Макс. пробег"
             value={filters.mileageMax}
             onChange={(value) => setFilters({ ...filters, mileageMax: value })}
-            style={{ width: "150px" }}
+            style={{ width: "150px", marginBottom: "20px" }}
          />
       </>
    );
