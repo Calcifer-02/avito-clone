@@ -18,13 +18,31 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
    const [messageApi, contextHolder] = message.useMessage(); // API для сообщений
 
    useEffect(() => {
-      // Загружаем черновик из localStorage при загрузке страницы
-      const savedDraft = localStorage.getItem("draft");
-      if (savedDraft) {
-         // Убираем черновик из localStorage, чтобы форма не заполнилась при перезагрузке
-         localStorage.removeItem("draft");
-      }
-   }, []);
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+         const values = form.getFieldsValue();
+         if (
+            Object.values(values).some(
+               (value) => value !== undefined && value !== ""
+            )
+         ) {
+            localStorage.setItem("draft", JSON.stringify(values));
+            const savedDrafts = localStorage.getItem("drafts");
+            const drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
+            drafts.push({ ...values, id: Date.now().toString() });
+            localStorage.setItem("drafts", JSON.stringify(drafts));
+
+            // Показываем стандартное диалоговое окно браузера
+            e.preventDefault();
+            e.returnValue =
+               "Вы действительно хотите покинуть страницу? Данные формы будут сохранены в черновик.";
+         }
+      };
+
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      return () => {
+         window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+   }, [form]);
 
    const handleCategoryChange = (value: string) => {
       setCategory(value as Category); // Обновление категории при изменении
