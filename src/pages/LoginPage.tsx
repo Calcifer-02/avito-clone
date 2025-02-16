@@ -1,7 +1,7 @@
 import { Button, Input, Form, Typography, message } from "antd";
 import { useNavigate } from "react-router-dom";
 
-const { Title } = Typography; // Деструктурируем компонент Title из Typography для заголовка
+const { Title } = Typography;
 
 const LoginPage = () => {
    const navigate = useNavigate(); // Инициализируем хук для навигации
@@ -11,7 +11,7 @@ const LoginPage = () => {
       try {
          // Отправляем запрос на сервер для авторизации
          const response = await fetch("http://localhost:8000/login", {
-            method: "POST", // Метод запроса
+            method: "POST",
             headers: {
                "Content-Type": "application/json", // Устанавливаем тип содержимого
             },
@@ -23,41 +23,38 @@ const LoginPage = () => {
          if (response.ok) {
             // Если ответ успешный, сохраняем токен в localStorage
             localStorage.setItem("token", data.token);
-            message.success("Успешный вход"); // Показываем успешное сообщение
-            navigate("/profile"); // Перенаправляем на страницу профиля
+            message.success("Успешный вход");
+            // Перенаправляем на страницу профиля
+            navigate("/profile");
          } else {
-            message.error(data.message || "Ошибка авторизации"); // Показываем ошибку авторизации
+            message.error(data.message || "Ошибка авторизации");
          }
       } catch (error) {
-         message.error("Ошибка сервера"); // Если ошибка сервера, выводим соответствующее сообщение
+         message.error("Ошибка сервера");
       }
    };
 
    return (
       <div className="login-container">
-         <Title level={2}>Авторизация</Title> {/* Заголовок страницы */}
+         <Title level={2}>Авторизация</Title>
          <Form layout="vertical" onFinish={onFinish}>
-            {" "}
-            {/* Форма для авторизации */}
             <Form.Item
                label="Логин"
                name="username"
-               rules={[{ required: true, message: "Введите логин!" }]} // Правило для обязательного ввода логина
+               rules={[{ required: true, message: "Введите логин!" }]}
             >
-               <Input placeholder="Введите логин" />{" "}
-               {/* Поле для ввода логина */}
+               <Input placeholder="Введите логин" />
             </Form.Item>
             <Form.Item
                label="Пароль"
                name="password"
-               rules={[{ required: true, message: "Введите пароль!" }]} // Правило для обязательного ввода пароля
+               rules={[{ required: true, message: "Введите пароль!" }]}
             >
-               <Input.Password placeholder="Введите пароль" />{" "}
-               {/* Поле для ввода пароля */}
+               <Input.Password placeholder="Введите пароль" />
             </Form.Item>
             <Form.Item>
                <Button type="primary" htmlType="submit" block>
-                  Войти {/* Кнопка для отправки формы */}
+                  Войти
                </Button>
             </Form.Item>
          </Form>
@@ -65,4 +62,4 @@ const LoginPage = () => {
    );
 };
 
-export default LoginPage; // Экспортируем компонент для использования в других частях приложения
+export default LoginPage;
