@@ -7,6 +7,7 @@ export default defineConfig({
    server: {
       proxy: {
          "/items": "http://server:3000",
+         "/login": "http://localhost:8000",
       },
    },
 });

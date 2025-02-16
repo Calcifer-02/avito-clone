@@ -16,7 +16,6 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
    const [category, setCategory] = useState<Category | null>(null);
    const [form] = Form.useForm();
    const [messageApi, contextHolder] = message.useMessage();
-   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
    const handleCategoryChange = (value: string) => {
       setCategory(value as Category);
@@ -37,10 +36,6 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
          console.error("Ошибка при добавлении объявления:", error);
          messageApi.error("Не удалось добавить объявление");
       }
-   };
-
-   const toggleMenu = () => {
-      setIsMenuOpen(!isMenuOpen);
    };
 
    return (
@@ -70,28 +65,6 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
                   Создать объявление
                </Button>
             </Form.Item>
-
-            <div
-               className={`burger-menu ${isMenuOpen ? "open" : ""}`}
-               onClick={toggleMenu}
-            >
-               <div></div>
-               <div></div>
-               <div></div>
-            </div>
-
-            {isMenuOpen && (
-               <div className="mobile-menu">
-                  <Button
-                     type="primary"
-                     onClick={() => {
-                        /* Ссылка на список объявлений */
-                     }}
-                  >
-                     Список объявлений
-                  </Button>
-               </div>
-            )}
          </Form>
       </>
    );

@@ -1,5 +1,7 @@
 import React from "react";
-import { Form, Input, InputNumber } from "antd";
+import { Form, Input, InputNumber, Select } from "antd";
+
+const { Option } = Select;
 
 const AutoFields: React.FC = () => {
    return (
@@ -9,7 +11,12 @@ const AutoFields: React.FC = () => {
             label="Марка"
             rules={[{ required: true, message: "Введите марку" }]}
          >
-            <Input />
+            <Select placeholder="Выберите марку">
+               <Option value="Toyota">Toyota</Option>
+               <Option value="BMW">BMW</Option>
+               <Option value="Mercedes">Mercedes</Option>
+               {/* Добавьте другие марки по необходимости */}
+            </Select>
          </Form.Item>
          <Form.Item
             name="model"

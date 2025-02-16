@@ -4,13 +4,13 @@ services:
          context: .
          dockerfile: Dockerfile
       ports:
-         - "5173:5173/"
-      volumes:
-         - .:/app
-      depends_on:
-         - server
+         - "5173:5173"
       environment:
          - NODE_ENV=development
+      networks:
+         - avito-network
+      depends_on:
+         - server
 
    server:
       build:
@@ -18,10 +18,22 @@ services:
          dockerfile: server/Dockerfile
       ports:
          - "3000:3000"
-      volumes:
-         - ./server:/server
       environment:
          - NODE_ENV=development
+      networks:
+         - avito-network
+
+   auth:
+      build:
+         context: .
+         dockerfile: json-server/Dockerfile # Изменили путь на json-server
+      ports:
+         - "8000:8000"
+      environment:
+         - NODE_ENV=development
+         - SECRET_KEY=your_secret_key
+      networks:
+         - avito-network
 networks:
    avito-network:
       driver: bridge

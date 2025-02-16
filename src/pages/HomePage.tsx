@@ -2,18 +2,16 @@ import React from "react";
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
-// HomePage — компонент для отображения главной страницы
 const HomePage: React.FC = () => {
    const navigate = useNavigate();
+   const isAuthenticated = !!localStorage.getItem("token"); // Проверяем, есть ли токен
 
-   // Обработчик перехода к форме создания объявления
-   const handleCreateAd = () => {
-      navigate("/form");
-   };
-
-   // Обработчик перехода к списку объявлений
-   const handleViewAds = () => {
-      navigate("/list");
+   const handleProtectedNavigation = (path: string) => {
+      if (isAuthenticated) {
+         navigate(path);
+      } else {
+         navigate("/login");
+      }
    };
 
    return (
@@ -28,12 +26,17 @@ const HomePage: React.FC = () => {
             <Button
                type="primary"
                size="large"
-               onClick={handleCreateAd}
+               onClick={() => handleProtectedNavigation("/form")}
                style={{ marginRight: "20px" }}
             >
                Создать новое объявление
             </Button>
-            <Button type="default" size="large" onClick={handleViewAds}>
+            <Button
+               type="default"
+               size="large"
+               onClick={() => handleProtectedNavigation("/list")}
+               style={{ marginRight: "20px" }}
+            >
                Перейти к списку объявлений
             </Button>
          </div>

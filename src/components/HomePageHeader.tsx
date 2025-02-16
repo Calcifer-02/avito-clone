@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { Layout, Button } from "antd";
-import { Link } from "react-router-dom";
+import { Layout, Button, Avatar } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 
 const { Header: AntHeader } = Layout;
 
 const AppHeader = () => {
-   const [windowWidth, setWindowWidth] = useState(window.innerWidth); // Состояние для ширины окна
+   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+   const navigate = useNavigate();
+   const isAuthenticated = !!localStorage.getItem("token"); // Проверяем наличие токена
 
-   // Обработчик изменения размера экрана
    useEffect(() => {
       const handleResize = () => {
          setWindowWidth(window.innerWidth);
@@ -17,12 +18,19 @@ const AppHeader = () => {
       return () => window.removeEventListener("resize", handleResize);
    }, []);
 
+   const handleProtectedNavigation = (path: string) => {
+      if (isAuthenticated) {
+         navigate(path);
+      } else {
+         navigate("/login");
+      }
+   };
+
    return (
       <AntHeader className="app-header" style={{ marginBottom: "100px" }}>
          <div className="logo">
             <Link to="/">
-               {/* Проверка ширины окна и скрытие SVG при ширине меньше 600px */}
-               {windowWidth >= 600 && (
+               {windowWidth >= 610 && (
                   <>
                      <svg
                         width="30"
@@ -70,26 +78,47 @@ const AppHeader = () => {
          </div>
 
          <div className="menu">
-            <Link to="/form">
-               <Button
-                  className="menu-button"
-                  type="primary"
-                  size="large"
-                  style={{ color: "white" }}
-               >
-                  Создать объявление
-               </Button>
-            </Link>
-            <Link to="/list">
-               <Button
-                  className="menu-button"
-                  type="primary"
-                  size="large"
-                  style={{ color: "white" }}
-               >
-                  Список объявлений
-               </Button>
-            </Link>
+            <Button
+               className="menu-button"
+               type="primary"
+               size="large"
+               style={{ color: "white" }}
+               onClick={() => handleProtectedNavigation("/form")}
+            >
+               Создать объявление
+            </Button>
+
+            <Button
+               className="menu-button"
+               type="primary"
+               size="large"
+               style={{ color: "white" }}
+               onClick={() => handleProtectedNavigation("/list")}
+            >
+               Список объявлений
+            </Button>
+
+            <div
+               style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: "20px",
+               }}
+            >
+               <Link to={isAuthenticated ? "/profile" : "/login"}>
+                  <div
+                     style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginLeft: "20px",
+                     }}
+                  >
+                     <Avatar size={40} style={{ backgroundColor: "#1677ff" }}>
+                        {isAuthenticated ? "U" : "?"}
+                     </Avatar>
+                  </div>
+               </Link>
+            </div>
          </div>
       </AntHeader>
    );

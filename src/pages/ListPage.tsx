@@ -112,7 +112,9 @@ const ListPage: React.FC = () => {
          (filters.yearMin === null ||
             (ad.year !== undefined && ad.year >= filters.yearMin)) &&
          (filters.mileageMax === null ||
-            (ad.mileage !== undefined && ad.mileage <= filters.mileageMax)) &&
+            (ad.mileage !== undefined &&
+               ad.mileage !== null &&
+               Number(ad.mileage) <= Number(filters.mileageMax))) &&
          (filters.serviceType === "" ||
             ad.serviceType?.toLowerCase() ===
                filters.serviceType.toLowerCase()) &&
