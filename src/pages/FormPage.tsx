@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Select, Button, message } from "antd";
 import axios from "axios";
 import Ad from "../types"; // Импорт типов объявления
@@ -17,22 +17,57 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
    const [form] = Form.useForm();
    const [messageApi, contextHolder] = message.useMessage(); // API для сообщений
 
+   useEffect(() => {
+      // Загружаем черновик из localStorage при загрузке страницы
+      const savedDraft = localStorage.getItem("draft");
+      if (savedDraft) {
+         // Убираем черновик из localStorage, чтобы форма не заполнилась при перезагрузке
+         localStorage.removeItem("draft");
+      }
+   }, []);
+
    const handleCategoryChange = (value: string) => {
       setCategory(value as Category); // Обновление категории при изменении
+   };
+
+   const handleSaveDraft = () => {
+      const values = form.getFieldsValue(); // Получаем все текущие значения формы
+
+      const newDraft = { ...values, id: Date.now().toString() }; // Добавляем уникальный ID для черновика
+
+      // Загружаем текущий список черновиков из localStorage
+      const savedDrafts = localStorage.getItem("drafts");
+      const drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
+
+      // Добавляем новый черновик в список
+      drafts.push(newDraft);
+
+      // Сохраняем обновлённый список черновиков в localStorage
+      localStorage.setItem("drafts", JSON.stringify(drafts));
+
+      // Сохраняем черновик в localStorage (при необходимости)
+      localStorage.setItem("draft", JSON.stringify(values));
+
+      messageApi.success("Черновик сохранён!");
+
+      // Очистим форму после сохранения
+      form.resetFields();
+      setCategory(null); // Очистим категорию
    };
 
    const handleSubmit = async (values: Omit<Ad, "id">) => {
       try {
          // Отправка данных на сервер для создания объявления
          const response = await axios.post(
-            "http://localhost:3000/items", // URL сервера
+            "http://localhost:3000/items",
             values
-         );
+         ); // URL сервера
          const newAd = response.data; // Получение данных нового объявления
          messageApi.success("Объявление успешно добавлено!"); // Уведомление об успешном добавлении
          onSubmit(newAd); // Передаем новое объявление родительскому компоненту
          form.resetFields(); // Сброс формы
          setCategory(null); // Сброс категории
+         localStorage.removeItem("draft"); // Удаляем черновик из localStorage
       } catch (error: any) {
          console.error("Ошибка при добавлении объявления:", error);
          messageApi.error("Не удалось добавить объявление"); // Уведомление об ошибке
@@ -51,8 +86,6 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
                rules={[{ required: true, message: "Выберите категорию" }]}
             >
                <Select onChange={handleCategoryChange}>
-                  {" "}
-                  {/* Выбор категории */}
                   <Option value="Недвижимость">Недвижимость</Option>
                   <Option value="Авто">Авто</Option>
                   <Option value="Услуги">Услуги</Option>
@@ -68,6 +101,8 @@ const FormPage: React.FC<{ onSubmit: (values: Ad) => void }> = ({
                </Button>
             </Form.Item>
          </Form>
+         {/* Кнопка для сохранения черновика */}
+         <Button onClick={handleSaveDraft}>Сохранить черновик</Button>
       </>
    );
 };

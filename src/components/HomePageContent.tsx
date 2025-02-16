@@ -9,6 +9,7 @@ import ItemPage from "../pages/ItemPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/LoginPage";
 import Profile from "../pages/Profile";
+import DraftsPage from "../pages/DraftsPage";
 const { Content } = Layout;
 
 const HomePageContent: React.FC = () => {
@@ -21,6 +22,7 @@ const HomePageContent: React.FC = () => {
             <Route path="/item/:id" element={<ItemPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/drafts" element={<DraftsPage />} />
             <Route path="*" element={<NotFoundPage />} />
          </Routes>
       </Content>
