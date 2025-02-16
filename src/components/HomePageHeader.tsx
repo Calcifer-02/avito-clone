@@ -110,7 +110,6 @@ const AppHeader = () => {
                      style={{
                         display: "flex",
                         alignItems: "center",
-                        marginLeft: "20px",
                      }}
                   >
                      <Avatar size={40} style={{ backgroundColor: "#1677ff" }}>
